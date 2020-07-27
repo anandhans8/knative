@@ -180,43 +180,43 @@ END
 ### Sending Events to the Broker
 You can create an event by sending an HTTP request to the Broker. SSH into the Pod by running the following command:
 ``` sh 
-kubectl --namespace event-example attach curl -it
+kubectl --namespace dhl-event attach curl -it
 ```
 
 To make the first request, which creates an event that has the type greeting, run the following in the SSH terminal
 ``` sh
-curl -v "http://default-broker.dhl-event.svc.cluster.local" \
+curl -v "http://broker-ingress.knative-eventing.svc.cluster.local/dhl-event/default" \
   -X POST \
   -H "Ce-Id: say-hello" \
   -H "Ce-Specversion: 0.3" \
   -H "Ce-Type: greeting" \
   -H "Ce-Source: not-sendoff" \
   -H "Content-Type: application/json" \
-  -d '{"msg":"Hello Knative!"}'
+  -d '{"msg":"Hello DHL ITS CHENNAI!"}'
 ```
 
 To make the second request, which creates an event that has the source sendoff, run the following in the SSH terminal:
 ``` sh
-curl -v "http://default-broker.dhl-event.svc.cluster.local" \
+curl -v "http://broker-ingress.knative-eventing.svc.cluster.local/dhl-event/default" \
   -X POST \
   -H "Ce-Id: say-goodbye" \
   -H "Ce-Specversion: 0.3" \
   -H "Ce-Type: not-greeting" \
   -H "Ce-Source: sendoff" \
   -H "Content-Type: application/json" \
-  -d '{"msg":"Goodbye Knative!"}'
+  -d '{"msg":"Goodbye DHL ITS CHENNAI!"}'
 ```
 
 To make the third request, which creates an event that has the type greeting and thesource sendoff, run the following in the SSH terminal:
 ``` sh
-curl -v "http://default-broker.dhl-event.svc.cluster.local" \
+curl -v "http://broker-ingress.knative-eventing.svc.cluster.local/dhl-event/default" \
   -X POST \
   -H "Ce-Id: say-hello-goodbye" \
   -H "Ce-Specversion: 0.3" \
   -H "Ce-Type: greeting" \
   -H "Ce-Source: sendoff" \
   -H "Content-Type: application/json" \
-  -d '{"msg":"Hello Knative! Goodbye Knative!"}'
+  -d '{"msg":"Hello DHL ITS CHENNAI! Goodbye DHL ITS CHENNAI!"}'
 ```
 
 ### Verifying events were received
