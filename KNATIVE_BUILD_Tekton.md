@@ -44,6 +44,62 @@ kubectl apply -f service-account.yaml
 serviceaccount "docker-build-bot" created
 ```
 
+## Design the Task
+
+[Kaniko](https://github.com/GoogleContainerTools/kaniko) is a tool to build container images from a Dockerfile, inside a container in Kubernetes cluster. The advantage is that Kaniko doesn't depend on a Docker daemon. Let's create a generic Task to use Kaniko.
+
+Create a [task-build-docker-images-from-git-source.yaml](../build/task-build-docker-images-from-git-source.yaml) file:
+
+```yaml
+apiVersion: tekton.dev/v1alpha1
+kind: Task
+metadata:
+  name: build-docker-image-from-git-source
+spec:
+  inputs:
+    resources:
+      - name: docker-source
+        type: git
+    params:
+      - name: pathToDockerFile
+        type: string
+        description: The path to the dockerfile to build
+        default: /workspace/docker-source/Dockerfile
+      - name: pathToContext
+        type: string
+        description:
+          The build context used by Kaniko
+          (https://github.com/GoogleContainerTools/kaniko#kaniko-build-contexts)
+        default: /workspace/docker-source
+  outputs:
+    resources:
+      - name: builtImage
+        type: image
+  steps:
+    - name: build-and-push
+      image: gcr.io/kaniko-project/executor:v0.9.0
+      # specifying DOCKER_CONFIG is required to allow kaniko to detect docker credential
+      env:
+        - name: "DOCKER_CONFIG"
+          value: "/builder/home/.docker/"
+      command:
+        - /kaniko/executor
+      args:
+        - --dockerfile=$(inputs.params.pathToDockerFile)
+        - --destination=$(outputs.resources.builtImage.url)
+        - --context=$(inputs.params.pathToContext)
+```
+
+This defines a generic Task to use Kaniko to download the source code in the 'workspace' directory and then use Kaniko to build and push an image to Docker Hub.
+
+Create the task:
+
+```bash
+kubectl apply -f task-build-docker-images-from-git-source.yaml
+
+task.tekton.dev/build-docker-image-from-git-source created
+```
+
 ## Design the TaskRun
 
 Create a [taskrun-build-helloworld-docker.yaml](../build/taskrun-build-helloworld-docker.yaml) file:
