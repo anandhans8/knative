@@ -199,4 +199,4 @@ build-helloworld-docker-pod-a1d405        0/4       Completed
 
 At this point, you should see the image pushed to Docker Hub:
 
-![Docker Hub](./docker-hub.png)
+![Docker Hub](./docker-hub.PNG)
